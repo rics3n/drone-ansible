@@ -43,7 +43,7 @@ func main() {
 	}
 
 	// Docker environment info
-	cmd := exec.Command("/usr/bin/ansible-playbook", "-i", fmt.Sprintf("/drone/src/%s", vargs.Inventory), fmt.Sprintf("/drone/src/%s", vargs.Playbook))
+	cmd := exec.Command("/usr/bin/ansible-playbook", "-i", vargs.Inventory, vargs.Playbook)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	trace(cmd)
