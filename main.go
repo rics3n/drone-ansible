@@ -42,16 +42,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Docker environment info
-	cmd := exec.Command("cd /drone && ls")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	trace(cmd)
-	err := cmd.Run()
-	if err != nil {
-		os.Exit(1)
-	}
-
 	inventory_path := fmt.Sprintf("/drone/src/%s", vargs.Inventory)
 	playbook_path := fmt.Sprintf("/drone/src/%s", vargs.Playbook)
 	// Docker environment info
