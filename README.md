@@ -13,7 +13,7 @@ docker build --rm=true -t rics3n/drone-ansible .
 Build and Publish a Docker container
 
 ```sh
-docker run -i --privileged -v $(pwd):/drone/src plugins/drone-docker <<EOF
+docker run -i --privileged -v $(pwd):/drone/src rics3n/drone-ansible <<EOF
 {
 	"workspace": {
 		"path": "/drone/src"
@@ -27,11 +27,8 @@ docker run -i --privileged -v $(pwd):/drone/src plugins/drone-docker <<EOF
 		}
 	},
 	"vargs": {
-		"username": "kevinbacon",
-		"password": "pa$$word", 
-		"email": "foo@bar.com", 
-		"repo": "foo/bar",
-		"storage_driver": "aufs"
+		"playbook": "provision.yml",
+		"inventory": "inventory/staging"
 	}
 }
 EOF

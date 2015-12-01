@@ -36,14 +36,14 @@ func main() {
 		vargs.Playbook = "playbook.yml"
 	}
 
-	// write the rsa private key if provided
+	// write the rsa private key
 	if err := writeKey(workspace); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
 	// Docker environment info
-	cmd := exec.Command("/usr/bin/ansible-playbook", "-i", vargs.Inventory, vargs.Playbook)
+	cmd := exec.Command("/usr/bin/ansible-playbook", "-i", fmt.Sprintf("/drone/src/%s", vargs.Inventory), fmt.Sprintf("/drone/src/%s", vargs.Playbook))
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	trace(cmd)
