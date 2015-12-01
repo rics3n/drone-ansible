@@ -57,7 +57,7 @@ func main() {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	trace(cmd)
-	err := cmd.Run()
+	err = cmd.Run()
 	if err != nil {
 		os.Exit(1)
 	}
