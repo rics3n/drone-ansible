@@ -43,7 +43,7 @@ func main() {
 	}
 
 	// Docker environment info
-	cmd := exec.Command("ls")
+	cmd := exec.Command("cd /drone/src && ls")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	trace(cmd)
@@ -52,8 +52,10 @@ func main() {
 		os.Exit(1)
 	}
 
+	inventory_path := fmt.Sprintf("/drone/src/%s", vargs.Inventory)
+	playbook_path := fmt.Sprintf("/drone/src/%s", vargs.Playbook)
 	// Docker environment info
-	cmd = exec.Command("/usr/bin/ansible-playbook", "-i", vargs.Inventory, vargs.Playbook)
+	cmd = exec.Command("/usr/bin/ansible-playbook", "-i", inventory_path, playbook_path)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	trace(cmd)
