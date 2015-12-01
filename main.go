@@ -43,7 +43,7 @@ func main() {
 	}
 
 	// Docker environment info
-	cmd := exec.Command("cd /drone/src && ls")
+	cmd := exec.Command("cd /drone && ls")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	trace(cmd)
