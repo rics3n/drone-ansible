@@ -42,21 +42,30 @@ func main() {
 		os.Exit(1)
 	}
 
+	// write ansible configuration
+	if err := writeAnsibleConf(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
 	var args []string
-	args = append(args, fmt.Sprintf("-i /drone/src/%s", vargs.Inventory))
-
-
+	args = append(args, "-i", fmt.Sprintf("/drone/src/%s", vargs.Inventory))
+	//enables verbose output of ansible
+	//args = append(args, "-v")
 	// last append the playbook to execute to the args array
 	args = append(args, fmt.Sprintf("/drone/src/%s", vargs.Playbook))
 
 	// Run ansible 
 	cmd := exec.Command("/usr/bin/ansible-playbook", args...)
+	//cmd := exec.Command("/usr/bin/ansible-playbook", "-i" ,"/drone/src/provisioning/inventory/staging", "/drone/src/provisioning/provision.yml")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	trace(cmd)
 	err := cmd.Run()
 	if err != nil {
+		fmt.Println(err)
 		os.Exit(1)
+		return
 	}
 }
 
@@ -84,4 +93,10 @@ func writeKey(in plugin.Workspace) error {
 	privpath := filepath.Join(sshpath, "id_rsa")
 	ioutil.WriteFile(confpath, []byte("StrictHostKeyChecking no\n"), 0700)
 	return ioutil.WriteFile(privpath, []byte(in.Keys.Private), 0600)
+}
+
+func writeAnsibleConf() error {
+	confpath := "/etc/ansible/ansible.cfg"
+	//this disables host key checking.. be aware of the man in the middle
+	return ioutil.WriteFile(confpath, []byte("[defaults]\nhost_key_checking = False\n"), 0600)	
 }
