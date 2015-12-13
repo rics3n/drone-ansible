@@ -7,7 +7,7 @@ The following parameters are used to configure this plugin:
 The following is a sample Docker configuration in your .drone.yml file:
 
 ```yaml
-provision:
+deploy:
   ansible:
   	image: rics3n/drone-ansible
     inventory: inventory/staging
