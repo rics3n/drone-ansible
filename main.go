@@ -27,11 +27,11 @@ func main() {
 	plugin.Param("vargs", &vargs)
 	plugin.MustParse()
 
-	// Set the Inventory file
+	// Set the default inventory file if none is provided
 	if len(vargs.Inventory) == 0 {
 		vargs.Inventory = "hosts"
 	}
-	// Set the Playbook
+	// Set the default playbook if none is provided
 	if len(vargs.Playbook) == 0 {
 		vargs.Playbook = "playbook.yml"
 	}
@@ -42,14 +42,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	inventory_path := fmt.Sprintf("/drone/src/%s", vargs.Inventory)
-	playbook_path := fmt.Sprintf("/drone/src/%s", vargs.Playbook)
-	// Docker environment info
-	cmd = exec.Command("/usr/bin/ansible-playbook", "-i", inventory_path, playbook_path)
+	var args []string
+	args = append(args, fmt.Sprintf("-i /drone/src/%s", vargs.Inventory))
+
+
+	// last append the playbook to execute to the args array
+	args = append(args, fmt.Sprintf("/drone/src/%s", vargs.Playbook))
+
+	// Run ansible 
+	cmd := exec.Command("/usr/bin/ansible-playbook", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	trace(cmd)
-	err = cmd.Run()
+	err := cmd.Run()
 	if err != nil {
 		os.Exit(1)
 	}
