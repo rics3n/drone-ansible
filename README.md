@@ -1,9 +1,9 @@
-# drone-docker
+# drone-ansible
 Drone plugin for provisioning with ansible
 
 ## Docker
 
-Build and Publish a Docker container
+Build and Publish the Docker container
 
 ```sh
 docker build --rm=true -t rics3n/drone-ansible .
