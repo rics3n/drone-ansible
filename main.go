@@ -13,8 +13,8 @@ import (
 )
 
 type Ansible struct {
-	Inventory 	string   `json:"inventory"`
-	Playbook 	string   `json:"playbook"`
+	Inventory string `json:"inventory"`
+	Playbook  string `json:"playbook"`
 }
 
 func main() {
@@ -29,11 +29,11 @@ func main() {
 
 	// Set the default inventory file if none is provided
 	if len(vargs.Inventory) == 0 {
-		vargs.Inventory = "hosts"
+		vargs.Inventory = "provisioning/inventory/staging"
 	}
 	// Set the default playbook if none is provided
 	if len(vargs.Playbook) == 0 {
-		vargs.Playbook = "playbook.yml"
+		vargs.Playbook = "provisioning/playbook.yml"
 	}
 
 	// write the rsa private key
@@ -48,25 +48,30 @@ func main() {
 		os.Exit(1)
 	}
 
-	var args []string
-	args = append(args, "-i", fmt.Sprintf("/drone/src/%s", vargs.Inventory))
-	//enables verbose output of ansible
-	//args = append(args, "-v")
-	// last append the playbook to execute to the args array
-	args = append(args, fmt.Sprintf("/drone/src/%s", vargs.Playbook))
+	// Run ansible
+	cmd := command(vargs, workspace)
+	trace(cmd)
 
-	// Run ansible 
-	cmd := exec.Command("/usr/bin/ansible-playbook", args...)
-	//cmd := exec.Command("/usr/bin/ansible-playbook", "-i" ,"/drone/src/provisioning/inventory/staging", "/drone/src/provisioning/provision.yml")
+	cmd.Env = os.Environ()
+	cmd.Dir = workspace.Path
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	trace(cmd)
+
 	err := cmd.Run()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("Failed to deploy playbook %s with inventory %s: %s", vargs.Playbook, vargs.Inventory, err)
 		os.Exit(1)
-		return
 	}
+}
+
+func command(vargs Ansible, w plugin.Workspace) *exec.Cmd {
+
+	args := []string{
+		"-i",
+		filepath.Join(w.Path, vargs.Inventory),
+		filepath.Join(w.Path, vargs.Playbook),
+	}
+	return exec.Command("/usr/bin/ansible-playbook", args...)
 }
 
 // Trace writes each command to standard error (preceded by a ‘$ ’) before it
@@ -98,5 +103,5 @@ func writeKey(in plugin.Workspace) error {
 func writeAnsibleConf() error {
 	confpath := "/etc/ansible/ansible.cfg"
 	//this disables host key checking.. be aware of the man in the middle
-	return ioutil.WriteFile(confpath, []byte("[defaults]\nhost_key_checking = False\n"), 0600)	
+	return ioutil.WriteFile(confpath, []byte("[defaults]\nhost_key_checking = False\n"), 0600)
 }
