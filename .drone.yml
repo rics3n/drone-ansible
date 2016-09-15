@@ -22,7 +22,7 @@ publish:
     username: $$DOCKER_USER
     password: $$DOCKER_PASS
     email: $$DOCKER_EMAIL
-    repo: rics3n/drone-azure-storage
+    repo: $$DOCKER_USER/drone-ansible
     tag: develop
     when:
       branch: develop
