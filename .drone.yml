@@ -18,6 +18,14 @@ publish:
     repo: $$DOCKER_USERNAME/drone-ansible
     when:
       branch: master
+  docker:
+    username: $$DOCKER_USER
+    password: $$DOCKER_PASS
+    email: $$DOCKER_EMAIL
+    repo: rics3n/drone-azure-storage
+    tag: develop
+    when:
+      branch: develop
 
 # plugin:
 #   name: Docker
