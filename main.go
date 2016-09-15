@@ -27,14 +27,7 @@ func main() {
 	plugin.Param("vargs", &vargs)
 	plugin.MustParse()
 
-	// Set the default inventory file if none is provided
-	if len(vargs.Inventory) == 0 {
-		vargs.Inventory = "provisioning/inventory/staging"
-	}
-	// Set the default playbook if none is provided
-	if len(vargs.Playbook) == 0 {
-		vargs.Playbook = "provisioning/playbook.yml"
-	}
+	vargs = setDefaults(vargs)
 
 	// write the rsa private key
 	if err := writeKey(workspace); err != nil {
@@ -72,6 +65,18 @@ func command(vargs Ansible, w plugin.Workspace) *exec.Cmd {
 		filepath.Join(w.Path, vargs.Playbook),
 	}
 	return exec.Command("/usr/bin/ansible-playbook", args...)
+}
+
+func setDefaults(vargs Ansible) Ansible {
+	// Set the default inventory file if none is provided
+	if len(vargs.Inventory) == 0 {
+		vargs.Inventory = "provisioning/inventory/staging"
+	}
+	// Set the default playbook if none is provided
+	if len(vargs.Playbook) == 0 {
+		vargs.Playbook = "provisioning/provision.yml"
+	}
+	return vargs
 }
 
 // Trace writes each command to standard error (preceded by a ‘$ ’) before it

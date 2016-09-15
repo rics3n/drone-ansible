@@ -23,3 +23,13 @@ func TestCommandBuildCorrectly(t *testing.T) {
 		t.Error("command not composed correctly")
 	}
 }
+
+func TestCommandDefaultBuildCorrectly(t *testing.T) {
+	vargs := Ansible{}
+	if !reflect.DeepEqual(setDefaults(vargs), Ansible{
+		"provisioning/inventory/staging",
+		"provisioning/provision.yml",
+	}) {
+		t.Error("defaults do not match")
+	}
+}
