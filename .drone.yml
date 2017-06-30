@@ -1,38 +1,20 @@
-build:
-  image: golang:1.5
-  environment:
-    - GO15VENDOREXPERIMENT=1
-    - GOOS=linux
-    - GOARCH=amd64
-    - CGO_ENABLED=0
-  commands:
-    - go get
-    - go build
-    - go test
+workspace:
+  base: /go
+  path: src/github.com/rics3n/drone-ansible
 
-publish:
-  docker:
-    username: $$DOCKER_USERNAME
-    password: $$DOCKER_PASS
-    email: $$DOCKER_EMAIL
-    repo: $$DOCKER_USERNAME/drone-ansible
+pipeline:
+  test:
+    image: golang:1.6
+    environment:
+      - CGO_ENABLED=0
+    commands:
+      - go test -cover -coverprofile=coverage.out
+      - go build -ldflags "-s -w -X main.build=$DRONE_BUILD_NUMBER" -a -tags netgo
+
+  publish:
+    image: plugins/docker
+    repo: rics3n/drone-ansible:2
+    secrets: [ docker_username, docker_password ]
     when:
       branch: master
-  docker:
-    username: $$DOCKER_USER
-    password: $$DOCKER_PASS
-    email: $$DOCKER_EMAIL
-    repo: $$DOCKER_USER/drone-ansible
-    tag: develop
-    when:
-      branch: develop
-
-# plugin:
-#   name: Docker
-#   desc: Build and Publish images to a Docker registry.
-#   type: publish
-#   image: plugins/drone-docker
-#   labels:
-#     - docker
-#     - image
-#     - container
+      event: push
