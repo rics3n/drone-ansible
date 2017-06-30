@@ -1,0 +1,25 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "ZKxETlJdB2XubMrZnXB0FQimVA8=",
+			"path": "github.com/Sirupsen/logrus",
+			"revision": "10f801ebc38b33738c9d17d50860f484a0988ff5",
+			"revisionTime": "2017-03-17T14:32:14Z"
+		},
+		{
+			"checksumSHA1": "E1efVncF6gxXUsd6vw4VgK4D+LI=",
+			"path": "github.com/urfave/cli",
+			"revision": "b892ba3809cd07fcf2b064e166b0c2e16e0147bd",
+			"revisionTime": "2017-06-25T03:28:08Z"
+		},
+		{
+			"checksumSHA1": "Tkb1hBdBWeO7SGjixS2Hm48F6+s=",
+			"path": "golang.org/x/sys/unix",
+			"revision": "fb4cac33e3196ff7f507ab9b2d2a44b0142f5b5a",
+			"revisionTime": "2017-06-14T06:48:48Z"
+		}
+	],
+	"rootPath": "github.com/rics3n/drone-ansible"
+}
