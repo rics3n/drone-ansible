@@ -75,8 +75,7 @@ Execute from a project directory:
 docker run --rm=true \
   -e PLUGIN_SSH_KEY=${SSH_KEY} \
   -e DRONE_WORKSPACE=/go/src/github.com/username/test \
-  -e PLUGIN_INVENTORY=provisioning/inventory/homerlatest \
   -v $(pwd):/go/src/github.com/username/test \
-  -w /go/src/github.com/rics3n/test \
+  -w /go/src/github.com/username/test \
   rics3n/drone-ansible:2
 ```
