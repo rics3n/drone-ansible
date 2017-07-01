@@ -16,7 +16,6 @@ pipeline:
   deploy-staging:
     image: rics3n/drone-ansible
     inventory: staging
-    playbook: provision.yml
     secrets: [ ssh_key ]
     when:
       branch: master
@@ -27,7 +26,6 @@ pipeline:
   deploy-staging:
     image: rics3n/drone-ansible
     inventories: [ staging, staging_2 ]
-    playbook: provision.yml
     secrets: [ ssh_key ]
     when:
       branch: master
