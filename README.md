@@ -14,7 +14,7 @@ The following is a sample configuration in your .drone.yml file:
 ```yaml
 pipeline:
   deploy-staging:
-    image: rics3n/drone-ansible
+    image: rics3n/drone-ansible:2
     inventory: staging
     secrets: [ ssh_key ]
     when:
@@ -24,7 +24,7 @@ pipeline:
 ```yaml
 pipeline:
   deploy-staging:
-    image: rics3n/drone-ansible
+    image: rics3n/drone-ansible:2
     inventories: [ staging, staging_2 ]
     secrets: [ ssh_key ]
     when:
