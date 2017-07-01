@@ -13,23 +13,23 @@ The following is a sample Docker configuration in your .drone.yml file:
 ```yaml
 pipeline:
   deploy-staging:
-  	image: rics3n/drone-ansible
+    image: rics3n/drone-ansible
     inventory: inventory/staging
     playbook: provision.yml
-	secrets: [ ssh_key ]
-	when:
-		branch: master
+    secrets: [ ssh_key ]
+    when:
+      branch: master
 ```
 
 ```yaml
 pipeline:
   deploy-staging:
-  	image: rics3n/drone-ansible
+    image: rics3n/drone-ansible
     inventories: [ staging, latest ]
     playbook: provision.yml
-	secrets: [ ssh_key ]
-	when:
-		branch: master
+    secrets: [ ssh_key ]
+    when:
+      branch: master
 ```
 
 To addthe ssh key use drone secrets via the cli
