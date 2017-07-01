@@ -8,7 +8,7 @@ The following parameters are used to configure this plugin:
 * `playbook` - define the playbook file (default: provisioning/provision.yml)
 * `ssh-key` - define the ssh-key to use for connecting to hosts
 
-The following is a sample Docker configuration in your .drone.yml file:
+The following is a sample configuration in your .drone.yml file:
 
 ```yaml
 pipeline:
@@ -32,7 +32,7 @@ pipeline:
       branch: master
 ```
 
-To addthe ssh key use drone secrets via the cli
+To add the ssh key use drone secrets via the cli
 
 ```
 drone secret add \
@@ -68,7 +68,7 @@ docker: Error response from daemon: Container command
 '/bin/drone-ansible' not found or does not exist..
 ```
 
-## Usage
+## Local usage
 
 Execute from a project directory:
 
