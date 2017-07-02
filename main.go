@@ -45,6 +45,16 @@ func main() {
 			Usage:  "project base path",
 			EnvVar: "DRONE_WORKSPACE",
 		},
+		cli.StringFlag{
+			Name:   "commit.sha",
+			Usage:  "git commit sha",
+			EnvVar: "DRONE_COMMIT_SHA",
+		},
+		cli.StringFlag{
+			Name:   "commit.tag",
+			Usage:  "project base path",
+			EnvVar: "DRONE_TAG",
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
@@ -56,6 +66,8 @@ func run(c *cli.Context) error {
 	plugin := Plugin{
 		Build: Build{
 			Path: c.String("path"),
+			SHA:  c.String("commit.sha"),
+			Tag:  c.String("commit.tag"),
 		},
 		Config: Config{
 			InventoryPath: c.String("inventory-path"),

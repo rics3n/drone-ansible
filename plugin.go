@@ -20,6 +20,8 @@ type (
 	//Config defined the ansible configuration params
 	Build struct {
 		Path string
+		SHA  string
+		Tag  string
 	}
 
 	//Config defined the ansible configuration params
@@ -73,7 +75,7 @@ func (p Plugin) Exec() error {
 func command(build Build, config Config, inventory string) *exec.Cmd {
 
 	args := []string{
-		"-e \"ansible_ssh_private_key_file=/root/.ssh/id_rsa\"",
+		commandEnvVars(build),
 		"-i",
 		filepath.Join(build.Path, config.InventoryPath, inventory),
 		filepath.Join(build.Path, config.Playbook),
@@ -84,6 +86,19 @@ func command(build Build, config Config, inventory string) *exec.Cmd {
 // helper function to create the docker info command.
 func commandVersion() *exec.Cmd {
 	return exec.Command(ansibleBin, "--version")
+}
+
+func commandEnvVars(build Build) string {
+	args := []string{
+		"-e ansible_ssh_private_key_file=/root/.ssh/id_rsa",
+		fmt.Sprintf("-e commit_sha=%s", build.SHA),
+	}
+
+	if len(build.Tag) != 0 {
+		args = append(args, fmt.Sprintf("-e commit_tag=%s", build.Tag))
+	}
+
+	return strings.Join(args, " ")
 }
 
 // Trace writes each command to standard error (preceded by a ‘$ ’) before it

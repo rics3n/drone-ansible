@@ -32,7 +32,7 @@ pipeline:
 		branch: master
 ```
 
-To addthe ssh key use drone secrets via the cli
+To add the ssh key use drone secrets via the cli
 
 ```
 drone secret add \
@@ -40,6 +40,13 @@ drone secret add \
   -image rics3n/drone-ansible \
   -name ssh_key \
   -value @Path/to/.ssh/id_rsa
+```
+
+Exposed Drone variables to Ansible which can be used in any playbook:
+
+```
+commit_tag -> DRONE_TAG
+commit_sha -> DRONE_COMMIT_SHA
 ```
 
 ## Build
