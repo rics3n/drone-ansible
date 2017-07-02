@@ -3,33 +3,32 @@
 Use the Drone plugin to provision with ansible.
 The following parameters are used to configure this plugin:
 
-* `inventory` - define the inventory file (default: provisioning/inventory/staging)
+* `inventory` - define the inventory file (default: staging)
 * `inventories` - define multiple inventory files to deploy
+* `inventory-path`-  define the path in the project for ansible inventory files (default: provisioning/inventory)
 * `playbook` - define the playbook file (default: provisioning/provision.yml)
 * `ssh-key` - define the ssh-key to use for connecting to hosts
 
-The following is a sample Docker configuration in your .drone.yml file:
+The following is a sample configuration in your .drone.yml file:
 
 ```yaml
 pipeline:
   deploy-staging:
-  	image: rics3n/drone-ansible
-    inventory: inventory/staging
-    playbook: provision.yml
-	secrets: [ ssh_key ]
-	when:
-		branch: master
+    image: rics3n/drone-ansible:2
+    inventory: staging
+    secrets: [ ssh_key ]
+    when:
+      branch: master
 ```
 
 ```yaml
 pipeline:
   deploy-staging:
-  	image: rics3n/drone-ansible
-    inventories: [ staging, latest ]
-    playbook: provision.yml
-	secrets: [ ssh_key ]
-	when:
-		branch: master
+    image: rics3n/drone-ansible:2
+    inventories: [ staging, staging_2 ]
+    secrets: [ ssh_key ]
+    when:
+      branch: master
 ```
 
 To add the ssh key use drone secrets via the cli
@@ -75,7 +74,7 @@ docker: Error response from daemon: Container command
 '/bin/drone-ansible' not found or does not exist..
 ```
 
-## Usage
+## Local usage
 
 Execute from a project directory:
 
@@ -83,8 +82,7 @@ Execute from a project directory:
 docker run --rm=true \
   -e PLUGIN_SSH_KEY=${SSH_KEY} \
   -e DRONE_WORKSPACE=/go/src/github.com/username/test \
-  -e PLUGIN_INVENTORY=provisioning/inventory/homerlatest \
   -v $(pwd):/go/src/github.com/username/test \
-  -w /go/src/github.com/rics3n/test \
+  -w /go/src/github.com/username/test \
   rics3n/drone-ansible:2
 ```
