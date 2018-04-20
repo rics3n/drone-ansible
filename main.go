@@ -36,6 +36,11 @@ func main() {
 			EnvVar: "PLUGIN_PLAYBOOK",
 		},
 		cli.StringFlag{
+			Name:   "ssh-user",
+			Usage:  "ssh user to access remote hosts",
+			EnvVar: "SSH_USER,PLUGIN_SSH_USER",
+		},
+		cli.StringFlag{
 			Name:   "ssh-key",
 			Usage:  "ssh key to access remote hosts",
 			EnvVar: "SSH_KEY,PLUGIN_SSH_KEY",
@@ -74,6 +79,7 @@ func run(c *cli.Context) error {
 			Inventories:   c.StringSlice("inventories"),
 			Playbook:      c.String("playbook"),
 			SSHKey:        c.String("ssh-key"),
+			SSHUser:       c.String("ssh-user"),
 		},
 	}
 
