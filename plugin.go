@@ -30,6 +30,7 @@ type (
 		Inventories   []string
 		Playbook      string
 		SSHKey        string
+		SSHUser       string
 	}
 
 	// Plugin defines the Ansible plugin parameters.
@@ -73,13 +74,13 @@ func (p Plugin) Exec() error {
 }
 
 func command(build Build, config Config, inventory string) *exec.Cmd {
-
-	args := []string{
-		commandEnvVars(build),
-		"-i",
-		filepath.Join(build.Path, config.InventoryPath, inventory),
-		filepath.Join(build.Path, config.Playbook),
+	var args []string
+	args = append(args, commandEnvVars(build))
+	if config.SSHUser != "" {
+		args = append(args, "-u", config.SSHUser)
 	}
+	args = append(args, "-i", filepath.Join(build.Path, config.InventoryPath, inventory))
+	args = append(args, filepath.Join(build.Path, config.Playbook))
 	return exec.Command(ansibleBin, args...)
 }
 
