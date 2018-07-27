@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -26,10 +27,12 @@ type (
 
 	//Config defined the ansible configuration params
 	Config struct {
-		InventoryPath string
-		Inventories   []string
-		Playbook      string
-		SSHKey        string
+		InventoryPath     string
+		Inventories       []string
+		Playbook          string
+		SSHKey            string
+		SSHKeyFile        string
+		AnsibleConfigFile string
 	}
 
 	// Plugin defines the Ansible plugin parameters.
@@ -41,19 +44,20 @@ type (
 
 func (p Plugin) Exec() error {
 	// write the rsa private key
-	if err := writeKey(p.Config); err != nil {
+	privateKeyFile, err := writeKey(p.Config)
+	if err != nil {
 		return err
 	}
 
 	// write ansible configuration
-	if err := writeAnsibleConf(); err != nil {
+	if err := writeAnsibleConf(p.Config); err != nil {
 		return err
 	}
 	var cmds []*exec.Cmd
 	cmds = append(cmds, commandVersion())
 
 	for _, inventory := range p.Config.Inventories {
-		cmds = append(cmds, command(p.Build, p.Config, inventory)) // docker tag
+		cmds = append(cmds, command(p.Build, p.Config, inventory, privateKeyFile)) // docker tag
 	}
 
 	// Run ansible
@@ -72,10 +76,10 @@ func (p Plugin) Exec() error {
 	return nil
 }
 
-func command(build Build, config Config, inventory string) *exec.Cmd {
+func command(build Build, config Config, inventory string, privateKeyFile string) *exec.Cmd {
 
 	args := []string{
-		commandEnvVars(build),
+		commandEnvVars(build, privateKeyFile),
 		"-i",
 		filepath.Join(build.Path, config.InventoryPath, inventory),
 		filepath.Join(build.Path, config.Playbook),
@@ -88,9 +92,9 @@ func commandVersion() *exec.Cmd {
 	return exec.Command(ansibleBin, "--version")
 }
 
-func commandEnvVars(build Build) string {
+func commandEnvVars(build Build, privateKeyFile string) string {
 	args := []string{
-		"-e ansible_ssh_private_key_file=/root/.ssh/id_rsa",
+		fmt.Sprintf("-e ansible_ssh_private_key_file=%s", privateKeyFile),
 		fmt.Sprintf("-e commit_sha=%s", build.SHA),
 	}
 
@@ -108,10 +112,7 @@ func trace(cmd *exec.Cmd) {
 }
 
 // Writes the RSA private key
-func writeKey(config Config) error {
-	if len(config.SSHKey) == 0 {
-		return nil
-	}
+func writeKey(config Config) (string, error) {
 	home := "/root"
 	u, err := user.Current()
 	if err == nil {
@@ -119,16 +120,100 @@ func writeKey(config Config) error {
 	}
 	sshpath := filepath.Join(home, ".ssh")
 	if err := os.MkdirAll(sshpath, 0700); err != nil {
-		return err
+		return "", err
 	}
 	confpath := filepath.Join(sshpath, "config")
-	privpath := filepath.Join(sshpath, "id_rsa")
+
 	ioutil.WriteFile(confpath, []byte("StrictHostKeyChecking no\n"), 0700)
-	return ioutil.WriteFile(privpath, []byte(config.SSHKey), 0600)
+
+	privpath := filepath.Join(sshpath, "id_rsa")
+	if len(config.SSHKey) != 0 {
+		ioutil.WriteFile(privpath, []byte(config.SSHKey), 0600)
+		return privpath, nil
+	}
+
+	if len(config.SSHKeyFile) != 0 {
+		err := copyFile(config.SSHKeyFile, privpath)
+		if err != nil {
+			serr := err.Error()
+			return "", fmt.Errorf("Couldn't copy key file %s to %s with error: %q\n", config.SSHKeyFile, privpath, serr)
+		}
+
+		// Set correct permissions
+		err = os.Chmod(privpath, 0400)
+		if err != nil {
+			serr := err.Error()
+			return privpath, fmt.Errorf("Couldn't set permissions for file %s with error: %q\n", privpath, serr)
+		}
+
+		return privpath, nil
+	}
+
+	return "", nil
 }
 
-func writeAnsibleConf() error {
+func writeAnsibleConf(config Config) error {
 	confpath := "/etc/ansible/ansible.cfg"
-	//this disables host key checking.. be aware of the man in the middle
-	return ioutil.WriteFile(confpath, []byte("[defaults]\nhost_key_checking = False\n"), 0600)
+
+	if len(config.AnsibleConfigFile) != 0 {
+		err := copyFile(config.AnsibleConfigFile, confpath)
+		if err != nil {
+			return err
+		}
+	} else {
+		f, err := os.OpenFile(confpath, os.O_CREATE|os.O_WRONLY, 0600)
+		if err != nil {
+			return err
+		}
+		//this disables host key checking.. be aware of the man in the middle
+		if _, err := f.Write([]byte("[defaults]\nhost_key_checking = False\n")); err != nil {
+			return err
+		}
+		if err := f.Close(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// Copies a file
+func copyFile(src, dst string) error {
+	sfi, err := os.Stat(src)
+	if err != nil {
+		return fmt.Errorf("Couldn't stat source file %s", src)
+	}
+	if !sfi.Mode().IsRegular() {
+		// cannot copy non-regular files (e.g., directories,
+		// symlinks, devices, etc.)
+		return fmt.Errorf("CopyFile: non-regular source file %s (%q)", sfi.Name(), sfi.Mode().String())
+	}
+
+	dfi, err := os.Stat(dst)
+	if os.SameFile(sfi, dfi) {
+		return nil
+	}
+
+	in, err := os.Open(src)
+	if err != nil {
+		return fmt.Errorf("Couldn't open source file %s", src)
+	}
+	defer in.Close()
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return fmt.Errorf("Couldn't create destination file %s", src)
+	}
+	defer func() {
+		cerr := out.Close()
+		if err == nil {
+			err = cerr
+		}
+	}()
+	if _, err = io.Copy(out, in); err != nil {
+		return fmt.Errorf("Couldn't copy file from source %s to destination %s", src, dst)
+	}
+	err = out.Sync()
+	return nil
+
 }
