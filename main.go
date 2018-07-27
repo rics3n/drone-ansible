@@ -41,6 +41,16 @@ func main() {
 			EnvVar: "SSH_KEY,PLUGIN_SSH_KEY",
 		},
 		cli.StringFlag{
+			Name:   "ssh-key-file",
+			Usage:  "path of an ssh key file to use",
+			EnvVar: "SSH_KEY_FILE,PLUGIN_SSH_KEY_FILE",
+		},
+		cli.StringFlag{
+			Name:   "ansible-config-file",
+			Usage:  "path of a custom ansible config file to use",
+			EnvVar: "ANSIBLE_CONFIG_FILE,PLUGIN_ANSIBLE_CONFIG_FILE",
+		},
+		cli.StringFlag{
 			Name:   "path",
 			Usage:  "project base path",
 			EnvVar: "DRONE_WORKSPACE",
@@ -70,10 +80,12 @@ func run(c *cli.Context) error {
 			Tag:  c.String("commit.tag"),
 		},
 		Config: Config{
-			InventoryPath: c.String("inventory-path"),
-			Inventories:   c.StringSlice("inventories"),
-			Playbook:      c.String("playbook"),
-			SSHKey:        c.String("ssh-key"),
+			InventoryPath:     c.String("inventory-path"),
+			Inventories:       c.StringSlice("inventories"),
+			Playbook:          c.String("playbook"),
+			SSHKey:            c.String("ssh-key"),
+			SSHKeyFile:        c.String("ssh-key-file"),
+			AnsibleConfigFile: c.String("ansible-config-file"),
 		},
 	}
 

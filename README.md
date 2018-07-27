@@ -3,11 +3,12 @@
 Use the Drone plugin to provision with ansible.
 The following parameters are used to configure this plugin:
 
-* `inventory` - define the inventory file (default: staging)
 * `inventories` - define multiple inventory files to deploy
 * `inventory-path`-  define the path in the project for ansible inventory files (default: provisioning/inventory)
 * `playbook` - define the playbook file (default: provisioning/provision.yml)
 * `ssh-key` - define the ssh-key to use for connecting to hosts
+* `ssh-key-file` - define the ssh key file to use for connecting to hosts
+* `ansible-config-file` - path of a custom ansible config file to use
 
 The following is a sample configuration in your .drone.yml file:
 
@@ -15,7 +16,7 @@ The following is a sample configuration in your .drone.yml file:
 pipeline:
   deploy-staging:
     image: rics3n/drone-ansible:2
-    inventory: staging
+    inventories: [ staging ]
     secrets: [ ssh_key ]
     when:
       branch: master
